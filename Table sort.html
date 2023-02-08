@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Table sort</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<style type="text/css">
+	body {
+		user-select: none;
+	}
+		
+	input[type=radio] {
+		cursor: pointer;
+	}
+	.content-table {
+	  min-width: 480px;
+	  border-collapse: collapse;
+	  margin: 10px 0;
+	  font-size: 0.9em;
+		border-radius: 5px 5px 0 0 !important;
+		overflow: hidden;
+		box-shadow: 0 0 20px rgba(0,0,0,.15)
+	}
+	.content-table thead tr {
+	  background-color: #009879;
+	  color: #fff;
+	  text-align: left;
+	  font-weight: bold;
+	}
+	.content-table th, .content-table td {
+	  padding: 12px 15px
+	}
+	.content-table tbody tr {
+	  border-bottom: 1px solid #ddd
+	}
+	.content-table tbody tr.active-row {
+		font-weight: bold;
+		color: #009879
+	}
+	.content-table tbody tr td:first-of-type {
+		text-align: center;
+	}
+	.content-table tbody tr:nth-of-type(even){
+	  background-color: #f3f3f3 !important;
+	}
+	.content-table tbody tr:last-of-type {
+	  border-bottom: 3px solid #009879
+	}
+	.content-table thead tr th:hover {
+		background-color: #007069;
+		cursor: pointer
+	}
+	.content-table thead tr th:not(.active) i{
+		display: none !important;
+	}
+	.content-table thead tr th:not(.active):hover i{
+		display: inline !important;
+	}
+
+	#myForm button {
+		padding: 1rem;
+		width: 48%;
+		background: #009879;
+		border: none;
+		border-radius: .3rem;
+		margin-top: 5px
+	}
+	#myForm input[type="file"] {
+		border: 1px solid #ddd;
+		padding: .5rem;
+		width: 46.5%
+	}
+
+
+
+</style>
+<body onload="TableObject.refreshTable(); tableHeader(); sort_uniq_headers()">
+	<div>
+		<label for="Gender">All</label>
+		<input type="radio" name="Gender" id="Gender" value="Male" onclick="TableObject.refreshTable()">
+		<label for="Gender">Female</label>
+		<input type="radio" name="Gender" id="Gender" value="Female" onclick="TableObject.filterTable('Female')">
+
+		<label for="Gender">Male</label>
+		<input type="radio" name="Gender" id="Gender" value="Male" onclick="TableObject.filterTable('Male')">		
+	</div>
+	<table class="content-table">
+		<thead>
+			<tr>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	<form id="myForm">
+		<input type="file" id="file"><br>
+		<button type="submit">Upload File</button>
+		<em><small>*Optional</small></em>
+	</form>		
+</body>
+</html>
+
+<script type="text/javascript">
+	var PRODUCTION_SERVER = "https://frantic-ant-wear.cyclic.app"
+	var DEV_SERVER = "http://localhost:8080"
+	var documentForm = document.querySelector("#myForm")
+	var inpfile = document.querySelector("#file")
+	documentForm.addEventListener("submit", (e) => {			
+		e.preventDefault()
+		console.log("Button clicked")	
+
+		var endpoint = PRODUCTION_SERVER + "/csv"
+
+		let formData = new FormData()
+		formData.append('file', inpfile.files[0])
+
+		console.log("Sending File", inpfile.files[0])
+
+	  	fetch(endpoint, {
+	  		method: "POST",	  		
+	  		body: formData
+	  	}).then((res) => {
+	  		console.log("successfully sent")
+	  		var data = res.json()	  		
+	  		console.log(data[0])
+	  		return data
+	  	}).then((data) => {
+	  		TableData = data
+	  		TableObject.refreshTable(data)
+	  		tableHeader(data);
+	  		sort_uniq_headers(data)
+	  	})
+	  	.catch(() => {
+	  		console.error()
+	  	})
+      
+      
+	})
+	var table = document.querySelector(".content-table");
+	var tableBody = document.querySelector("tbody");
+	var tableHead = document.querySelector("thead tr");
+
+	`THIS FUNCTION COMPUTES THE HEADER FOR THE TABLE.
+			IT TAKES THE FIRST OBJECT IN THE ARRAY
+			LOOPS THROUGH EACH OF THE PROPS IN THE OBJECT 
+				CREATE A TABLE HEAD ELEMENT (th)
+				SET ATTRIBUTES TO ALLOW MODIFICATION WITH JAVASCRIPT
+	
+				CREATE AN "I" ELEMENT
+				SET CLASS AND DATA VALUE ATTRIBUTES TO ALLOW MODIFICATION WITH JAVASCRIPT.
+				APPEND "I" ELEMENT TO TABLE HEADER (th)
+				APPEND TABLE HEADER TO THE TABLE ROW`;
+
+	function tableHeader(data=TableData){
+		tableHead.innerHTML = ""
+		var headers =  Object.keys(data[0])
+		headers.forEach((header, index) => {			
+			var th = document.createElement("th")
+			th.setAttribute("id", "header")
+			th.setAttribute("data-value", `${header}_header`)
+			th.setAttribute("class", `${header}_header`)
+			th.setAttribute("data", `${header}`)
+			if(index === 0){
+				th.setAttribute("class", `active ${header}_header`)
+			}
+
+			`CONVERT THE FIRST LETTER TO UPPERCASE AND APPEND TO THE TABLE HEADER`
+			var text = document.createTextNode(header[0].toUpperCase() + header.slice(1))
+			th.appendChild(text)
+
+			var i = document.createElement("i")
+			i.setAttribute("id", "sort_icon")
+			i.setAttribute("class", "fas fa-sort-amount-down-alt")
+			i.style.marginLeft = "10px"
+
+			th.appendChild(i)
+			tableHead.appendChild(th)
+		})
+		
+	}
+
+
+	`THIS FUNCTION ADDS AN EVENT TO ALL COLUMN/TABLE HEADERS 
+			LOOP THROUGH ALL HEADER ELEMENT
+				ADDS A CLICK EVENT TO EACH ELEMENT
+				ONCLICK, SORT THE TABLE BASED ON GIVEN PARAMETERS
+					PARAMETERS: SORT_PARAM = PARAMETER USED TO SORT 
+								ID = CLASS OF THE CLICKED ELEMENT`;
+
+	function sort_uniq_headers(){
+		var headers = document.querySelectorAll("#header")
+		headers.forEach(header => {
+			console.log(header)
+			header.addEventListener("click", ()=>{
+				const sort_param = header.getAttribute("data")
+				const id = header.getAttribute("data-value")
+				sort(sort_param, id)
+			})
+		})
+	}
+
+	var TableData = [
+	  {
+	  	rank: "rank",
+	  	name: "name",
+	  	gender: "gender",
+	  	points: "points",
+	  	teams: "teams",
+	  	gym: "gym"
+	  },
+	  { 
+	    rank: 1,
+	    name: "Sherlock",
+	    gender: "Female",
+	    points: "88,120",
+	    teams: "Puzzles",
+	    gym: "Mayfair"
+	  },
+	  { 
+	    rank: 2,
+	    name: "Emmanuella",
+	    gender: "Female",
+	    points: "88,10",
+	    teams: "Gamer",
+	    gym: "OAU"
+	  },
+	  { 
+	    rank: 3,
+	    name: "Akanni",
+	    gender: "Male",
+	    points: "88,1100",
+	    teams: "decoder",
+	    gym: "Damico"
+	  },
+	  { 
+	    rank: 4,
+	    name: "Domenic",
+	    gender: "Male",
+	    points: "88,110",
+	    teams: "Decode",
+	    gym: "Eleweran"
+	  },
+	  { 
+	    rank: 5,
+	    name: "Sally",
+	    gender: "Female",
+	    points: "72,400",
+	    teams: "Students",
+	    gym: "Sabo"
+	  },
+	  { 
+	    rank: 6,
+	    name: "Nick",
+	    gender: "Male",
+	    points: "52,300",
+	    teams: "Decode",
+	    gym: "Lagere"
+	  }
+	]
+
+	var TableObject = {
+	  asc: true,
+	  desc: false,
+	  refreshTable: function(data=TableData.slice(1)){
+	  	
+	  	// THIS METHOD REFRESHES THE TABLE AFTER MODIFICATION IS DONE
+	    tableBody.innerHTML = ""
+	    data.forEach((tableEntry) => {
+	      var tr = document.createElement("tr")
+	      var tdata = Object.values(tableEntry)
+	      tdata.forEach((entry) => {
+	        var td = document.createElement("td")
+	        td.innerHTML = entry
+	        tr.appendChild(td)
+	      })
+	      tableBody.appendChild(tr)  
+	    })
+	    // sort_uniq_headers()
+	  },
+	  
+	  filterTable: function(gender="Male"){
+	  	// THIS METHOD FILTERS THE TABLE BY GENDER
+	    var test = TableData.filter((data)=> data.gender === gender)
+	    this.refreshTable(test)
+	  },
+	  
+    sort_table: async function(sort_param){
+    	TableData.sort((a, b) => {
+          if(b[sort_param] < a[sort_param]) return 1;
+          else if(b[sort_param] > a[sort_param]) return -1
+          return 0
+        })
+      return TableData
+	},
+    
+    reverse_sort: async function(sort_param){
+        TableData.sort((a, b) => {
+          if(b[sort_param] > a[sort_param]) return 1;
+          else if(b[sort_param] < a[sort_param]) return -1
+          return 0
+        })
+        return TableData
+    },
+    
+    sort_asc: function(sort_param){
+      this.sort_table(sort_param).then((res) => {
+        let icon = document.querySelector("#sort_icon")
+        icon.className = "fas fa-sort-amount-down-alt"
+      }).then(() => TableObject.refreshTable())
+    },
+    
+    sort_desc: function(sort_param) {
+      this.reverse_sort(sort_param).then((res) => {
+          let icon = document.querySelector("#sort_icon")
+          icon.className = "fas fa-sort-amount-up"
+          console.log()
+      	}).then(() => {
+        	TableObject.refreshTable()
+      })
+    }
+}
+	
+	
+	
+
+	function sort(sort_param, id){
+		var table_header = document.querySelectorAll("#header")
+		// REMOVE ADD ACTIVE CLASS 
+		table_header.forEach((header) => {
+			header.classList.remove("active")
+			console.log(`this is header.childNodes[1] ${header.childNodes[1]}`)
+			header.childNodes[1].removeAttribute("id")
+		})
+		var active_header = document.querySelector(`.${id}`)
+		active_header.classList.add("active")
+		active_header.childNodes[1].setAttribute("id", "sort_icon")
+
+
+		if(TableObject.asc) {
+			TableObject.sort_asc(sort_param)
+			console.log("sorted in asc", sort_param, TableData)
+		} else {
+			TableObject.sort_desc(sort_param)
+			console.log("sorted in desc", sort_param, TableData)
+		}
+
+
+		TableObject.asc = !TableObject.asc
+		TableObject.desc = !TableObject.desc
+	}
+
+	function GetData() {
+		console.log("Getting data..............")
+		fetch("http://localhost:3000/csv").then((res) => {
+			console.log("File received from the backend")
+			return res.json()
+		}).then((data) => {
+			console.log(data.slice(0, 2))
+			TableData = data;
+
+			TableObject.refreshTable(data)
+			tableHeader(data)
+			sort_uniq_headers()
+		})
+	}
+
+	
+		
+
+
+
+
+
+</script>
