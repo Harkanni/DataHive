@@ -9,91 +9,28 @@
 	<meta property="og:description" content="Frontend Project (Table manipulation).  - Hosted ON GITHUB" />
 	<meta property="og:image" content="./images/Table_Sort_Preview.png" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="./style.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <style type="text/css">
-	body {
-		user-select: none;
-	}
-		
-	input[type=radio] {
-		cursor: pointer;
-	}
-	.content-table {
-	  min-width: 480px;
-	  border-collapse: collapse;
-	  margin: 10px 0;
-	  font-size: 0.9em;
-		border-radius: 5px 5px 0 0 !important;
-		overflow: hidden;
-		box-shadow: 0 0 20px rgba(0,0,0,.15)
-	}
-	.content-table thead tr {
-	  background-color: #009879;
-	  color: #fff;
-	  text-align: left;
-	  font-weight: bold;
-	}
-	.content-table th, .content-table td {
-	  padding: 12px 15px
-	}
-	.content-table tbody tr {
-	  border-bottom: 1px solid #ddd
-	}
-	.content-table tbody tr.active-row {
-		font-weight: bold;
-		color: #009879
-	}
-	.content-table tbody tr td:first-of-type {
-		text-align: center;
-	}
-	.content-table tbody tr:nth-of-type(even){
-	  background-color: #f3f3f3 !important;
-	}
-	.content-table tbody tr:last-of-type {
-	  border-bottom: 3px solid #009879
-	}
-	.content-table thead tr th:hover {
-		background-color: #007069;
-		cursor: pointer
-	}
-	.content-table thead tr th:not(.active) i{
-		display: none !important;
-	}
-	.content-table thead tr th:not(.active):hover i{
-		display: inline !important;
-	}
-
-	#myForm button {
-		cursor: pointer;
-		padding: 1rem;
-		width: 48%;
-		background: #009879;
-		border: none;
-		border-radius: .3rem;
-		margin-top: 5px
-	}
-	#myForm button:hover {
-		background-color: #007069;
-		color: #ddd
-	}
-	#myForm input[type="file"] {
-		border: 1px solid #ddd;
-		padding: .5rem;
-		width: 46.5%
-	}
+	
 </style>
 
 
 <body onload="TableObject.refreshTable(); tableHeader(); sort_uniq_headers()">
+	<div class="spinnerBg">
+		<div class="spinner">
+			<div class="circle"></div>
+		</div>			
+	</div>
 	<div>
-		<label for="Gender">All</label>
-		<input type="radio" name="Gender" id="Gender" value="Male" onclick="TableObject.refreshTable()">
-		<label for="Gender">Female</label>
-		<input type="radio" name="Gender" id="Gender" value="Female" onclick="TableObject.filterTable('Female')">
+	<label for="Gender">All</label>
+	<input type="radio" name="Gender" id="Gender" value="Male" onclick="TableObject.refreshTable()">
+	<label for="Gender">Female</label>
+	<input type="radio" name="Gender" id="Gender" value="Female" onclick="TableObject.filterTable('Female')">
 
-		<label for="Gender">Male</label>
-		<input type="radio" name="Gender" id="Gender" value="Male" onclick="TableObject.filterTable('Male')">		
+	<label for="Gender">Male</label>
+	<input type="radio" name="Gender" id="Gender" value="Male" onclick="TableObject.filterTable('Male')">		
 	</div>
 	<table class="content-table">
 		<thead>
@@ -124,6 +61,8 @@
 	documentForm.addEventListener("submit", (e) => {			
 		e.preventDefault()
 		console.log("Button clicked")	
+		var spinner = document.querySelector(".spinnerBg")
+	  	spinner.style.display = "flex"
 
 		var endpoint = PRODUCTION_SERVER + "/csv"
 
@@ -145,7 +84,11 @@
 	  		sort_uniq_headers(data)
 	  	})
 	  	.catch(() => {
+	  		alert("Error communicating with servers right now, check back a later time")
 	  		console.error()
+	  	}).finally(() => {
+	  		var spinner = document.querySelector(".spinnerBg")
+	  		spinner.style.display = "none"
 	  	})
       
       
