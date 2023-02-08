@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Table sort</title>
+	<title>DataHive</title>
 	<meta charset="utf-8">
+	<meta name="author" content="Akanni Emmanuel">
+	<link rel="icon" type="image/x-icon" href="./images/icon.png">
+	<meta property="og:title" content="A table that sorts data by column and filters data by gender. " />
+	<meta property="og:description" content="Frontend Project (Table manipulation).  - Hosted ON GITHUB" />
+	<meta property="og:image" content="./images/Table_Sort_Preview.png" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -60,12 +65,17 @@
 	}
 
 	#myForm button {
+		cursor: pointer;
 		padding: 1rem;
 		width: 48%;
 		background: #009879;
 		border: none;
 		border-radius: .3rem;
 		margin-top: 5px
+	}
+	#myForm button:hover {
+		background-color: #007069;
+		color: #ddd
 	}
 	#myForm input[type="file"] {
 		border: 1px solid #ddd;
@@ -94,7 +104,12 @@
 		</tbody>
 	</table>
 	<form id="myForm">
-		<input type="file" id="file"><br>
+		<input
+			type="file"
+			id="file"
+			accept=".csv"
+		>
+		<br>
 		<button type="submit">Upload File</button>
 		<em><small>*Optional</small></em>
 	</form>		
@@ -115,15 +130,13 @@
 		let formData = new FormData()
 		formData.append('file', inpfile.files[0])
 
-		console.log("Sending File", inpfile.files[0])
-
 	  	fetch(endpoint, {
 	  		method: "POST",	  		
 	  		body: formData
 	  	}).then((res) => {
 	  		console.log("successfully sent")
 	  		var data = res.json()	  		
-	  		console.log(data[0])
+	  		// console.log(data[0])
 	  		return data
 	  	}).then((data) => {
 	  		TableData = data
@@ -191,7 +204,7 @@
 	function sort_uniq_headers(){
 		var headers = document.querySelectorAll("#header")
 		headers.forEach(header => {
-			console.log(header)
+			// console.log(header)
 			header.addEventListener("click", ()=>{
 				const sort_param = header.getAttribute("data")
 				const id = header.getAttribute("data-value")
@@ -314,7 +327,7 @@
       this.reverse_sort(sort_param).then((res) => {
           let icon = document.querySelector("#sort_icon")
           icon.className = "fas fa-sort-amount-up"
-          console.log()
+          // console.log()
       	}).then(() => {
         	TableObject.refreshTable()
       })
@@ -329,7 +342,7 @@
 		// REMOVE ADD ACTIVE CLASS 
 		table_header.forEach((header) => {
 			header.classList.remove("active")
-			console.log(`this is header.childNodes[1] ${header.childNodes[1]}`)
+			// console.log(`this is header.childNodes[1] ${header.childNodes[1]}`)
 			header.childNodes[1].removeAttribute("id")
 		})
 		var active_header = document.querySelector(`.${id}`)
@@ -339,30 +352,15 @@
 
 		if(TableObject.asc) {
 			TableObject.sort_asc(sort_param)
-			console.log("sorted in asc", sort_param, TableData)
+			// console.log("sorted in asc", sort_param, TableData)
 		} else {
 			TableObject.sort_desc(sort_param)
-			console.log("sorted in desc", sort_param, TableData)
+			// console.log("sorted in desc", sort_param, TableData)
 		}
 
 
 		TableObject.asc = !TableObject.asc
 		TableObject.desc = !TableObject.desc
-	}
-
-	function GetData() {
-		console.log("Getting data..............")
-		fetch("http://localhost:3000/csv").then((res) => {
-			console.log("File received from the backend")
-			return res.json()
-		}).then((data) => {
-			console.log(data.slice(0, 2))
-			TableData = data;
-
-			TableObject.refreshTable(data)
-			tableHeader(data)
-			sort_uniq_headers()
-		})
 	}
 
 	
