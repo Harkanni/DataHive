@@ -23,33 +23,35 @@
 			<div class="circle"></div>
 		</div>			
 	</div>
-	<div>
-	<label for="Gender">All</label>
-	<input type="radio" name="Gender" id="Gender" value="Male" onclick="TableObject.refreshTable()">
-	<label for="Gender">Female</label>
-	<input type="radio" name="Gender" id="Gender" value="Female" onclick="TableObject.filterTable('Female')">
+	<main>
+		<div>
+			<label for="Gender">All</label>
+			<input type="radio" name="Gender" id="Gender" value="Male" onclick="TableObject.refreshTable()">
+			<label for="Gender">Female</label>
+			<input type="radio" name="Gender" id="Gender" value="Female" onclick="TableObject.filterTable('Female')">
 
-	<label for="Gender">Male</label>
-	<input type="radio" name="Gender" id="Gender" value="Male" onclick="TableObject.filterTable('Male')">		
-	</div>
-	<table class="content-table">
-		<thead>
-			<tr>
-			</tr>
-		</thead>
-		<tbody>
-		</tbody>
-	</table>
-	<form id="myForm">
-		<input
-			type="file"
-			id="file"
-			accept=".csv"
-		>
-		<br>
-		<button type="submit">Upload File</button>
-		<em><small>*Optional</small></em>
-	</form>		
+			<label for="Gender">Male</label>
+			<input type="radio" name="Gender" id="Gender" value="Male" onclick="TableObject.filterTable('Male')">		
+		</div>
+		<table class="content-table">
+			<thead>
+				<tr>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+		<form id="myForm">
+			<input
+				type="file"
+				id="file"
+				accept=".csv"
+			>
+			<br>
+			<button type="submit">Upload File</button>
+			<em><small>*Optional</small></em>
+		</form>	
+	</main>			
 </body>
 </html>
 
@@ -149,9 +151,16 @@
 		headers.forEach(header => {
 			// console.log(header)
 			header.addEventListener("click", ()=>{
+				// LOADING CLASS
+				var spinner = document.querySelector(".spinnerBg")
+	  			spinner.style.display = "flex"
+
 				const sort_param = header.getAttribute("data")
 				const id = header.getAttribute("data-value")
-				sort(sort_param, id)
+				sort(sort_param, id).finally(() => {
+					var spinner = document.querySelector(".spinnerBg")
+	  				spinner.style.display = "none"
+				})
 			})
 		})
 	}
@@ -280,7 +289,7 @@
 	
 	
 
-	function sort(sort_param, id){
+	async function sort(sort_param, id){
 		var table_header = document.querySelectorAll("#header")
 		// REMOVE ADD ACTIVE CLASS 
 		table_header.forEach((header) => {
@@ -303,7 +312,7 @@
 
 
 		TableObject.asc = !TableObject.asc
-		TableObject.desc = !TableObject.desc
+		TableObject.desc = !TableObject.desc		
 	}
 
 	
