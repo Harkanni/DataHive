@@ -76,19 +76,27 @@
 	  		body: formData
 	  	}).then((res) => {
 	  		console.log("successfully sent")
-	  		var data = res.json()	  		
-	  		// console.log(data[0])
+	  		var data = res.json()
 	  		return data
 	  	}).then((data) => {
 	  		TableData = data
+	  		console.log(data)
+	  		if(data.message) {
+	  			throw ({message: data.message})
+	  		}
 	  		TableObject.refreshTable(data)
 	  		tableHeader(data);
 	  		sort_uniq_headers(data)
+	  		return data
 	  	})
-	  	.catch(() => {
-	  		alert("Error communicating with servers right now, check back a later time")
-	  		console.error()
-	  	}).finally(() => {
+	  	.catch((err, data) => {
+	  		if(err.message) {
+	  			alert(err.message)
+	  		} else {
+	  			alert("There is an error communicating with the servers right now; please refresh the page and return at a later time.")
+	  		}	  		
+	  		console.log(err)
+	  	}).finally((data) => {
 	  		var spinner = document.querySelector(".spinnerBg")
 	  		spinner.style.display = "none"
 	  	})
