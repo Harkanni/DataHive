@@ -42,12 +42,18 @@
 			</tbody>
 		</table>
 		<form id="myForm">
-			<input
-				type="file"
-				id="file"
-				accept=".csv"
-			>
-			<br>
+			<div style="display: flex; flex-direction: column;">
+				<input
+					type="file"
+					id="file"
+					accept=".csv"
+				>
+				<small style="color: red; margin-top: 10px; display: none;">
+					<i class="fas fa-exclamation-circle"></i>
+					<em>Select file</em>
+				</small>
+			</div>
+				
 			<button type="submit">Upload File</button>
 			<em><small>*Optional</small></em>
 		</form>	
@@ -62,6 +68,11 @@
 	var inpfile = document.querySelector("#file")
 	documentForm.addEventListener("submit", (e) => {			
 		e.preventDefault()
+		if (!inpfile.value) {
+			var small = document.querySelector("small")
+			small.style.display = "block"
+			return false
+		}
 		console.log("Button clicked")	
 		var spinner = document.querySelector(".spinnerBg")
 	  	spinner.style.display = "flex"
@@ -92,9 +103,9 @@
 	  	.catch((err, data) => {
 	  		if(err.message) {
 	  			alert(err.message)
-	  		} else {
-	  			alert("There is an error communicating with the servers right now; please refresh the page and return at a later time.")
-	  		}	  		
+	  		}else {
+	  			alert("There is an error communicating with the servers right now; please refresh the page and return at a later time.") 
+	  		}
 	  		console.log(err)
 	  	}).finally((data) => {
 	  		var spinner = document.querySelector(".spinnerBg")
