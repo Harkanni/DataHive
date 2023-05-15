@@ -6,7 +6,7 @@
 
 body {
 	user-select: none;
-	max-height: 110vh;
+	max-height: 100vh;
 	display: flex;
 	flex-direction: column;
 }
